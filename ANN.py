@@ -7,16 +7,13 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 class ANN (object):
-    """
-        RNN Layer using only Numpy.
+    """ Simple FeedForward Network using only Numpy.
 
-        FF: Feed Foward method
-        Grad: Method to get Gradients
     """
 
     def __init__(self, Xc=None, Hc=None, rng=None):
 
-        """RNN class to make a simple connected RNN layer
+        """ANN class to make a fully connected ANN layer
 
         :param Xc: Total input count
         :param Hc: Total Node count
@@ -61,12 +58,12 @@ class ANN (object):
 
 
     def FF(self, input, reset=False):
-        """ Method for Feeding Fowared on the Layer.
+        """ Method for Feeding Forward on the Layer.
 
         :param input: Array input
         :param reset: Bool for if the history needs to be reset
 
-        :return: Returns the result node vaules.
+        :return: Returns the result node vales.
         """
 
         if reset:
@@ -76,7 +73,7 @@ class ANN (object):
             raise Exception("Input given not the same shape as Layer settings.")
 
         x = input
-        #y = np.tanh(np.dot(x, self.params["Wx"]) + np.dot(yLast, self.params["Wh"]) + self.params["b"])
+
         y = sigmoid(np.dot(x, self.params["Wx"])  + self.params["b"])
 
         self.hist.append({
@@ -87,17 +84,16 @@ class ANN (object):
         return y
 
     def Grad(self, error, t):
-        """
+        """ Function to compute the gradients at time T
 
         :param error: the Gradient Error at the post activation of this layer.
         :param t: Current Time to operate on.
         :return: The Gradient Error for the Input of this Layer.
         """
-        t +=1
+        t +=1 #increments Time because the gradients need to start at time -1
 
         dY = error
 
-        #db = ((1 - self.hist[t]['Y']) * self.hist[t]['Y']) * dY
         db = (self.hist[t]['Y'] * (1 - self.hist[t]['Y'])) * dY
 
 
@@ -113,14 +109,30 @@ class ANN (object):
 
 
     def update(self, learning_rate= 0.01):
+        """Function to update the Parameters based on the computed gradients.
+
+        :param learning_rate: the Learning rate for the update
+
+        :return: void
+        """
 
         self.params['b'] += self.deltas['db'] * -learning_rate
         self.params['Wx'] += self.deltas['dWx'] * -learning_rate
 
 
     def save(self, location):
+        """ Function to save the parameter state to a file
+
+        :param location: Location to save to
+        :return: void
+        """
 
         np.save(location, self.params)
 
     def load(self, loaction):
+        """ Function to Load the layer parameter state from a file
+
+        :param location:  Location to Load
+        :return: Void
+        """
         self.params = np.load(loaction).item()
